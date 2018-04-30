@@ -49,12 +49,14 @@ func main() {
     fmt.Println("\n\n*****\n\n")
 
     // Example of specifying a specific autoscale group
-    // (Set input to nil if we want to find all autoscale gropus)
+    // (Set input to nil if we want to find all autoscale groups)
     input := &autoscaling.DescribeAutoScalingGroupsInput{
         AutoScalingGroupNames: []*string{
-            aws.String("damian-heptio-k8s-K8sStack-1MZY47ZF88RCO-K8sNodeGroup-1LY9CV0XVVTLK"),
+            aws.String("myAutoScaleGroupName"),
         },
     }
+    // for now we just retrieve all
+    input = nil
 
     result3, err3 := asSvc.DescribeAutoScalingGroups(input)
     if err3 != nil {
