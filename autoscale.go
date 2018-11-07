@@ -80,7 +80,8 @@ func main() {
     // (should probably verify we only have 1 group)
     for _, instance := range asDescription.AutoScalingGroups[0].Instances {
 	fmt.Printf("Instance ID: %s,", *instance.InstanceId)
-	fmt.Printf("  Lifecycle State: %s,", *instance.LifecycleState)
+	fmt.Printf("  Lifecycle State: %s", *instance.LifecycleState)
+	fmt.Printf(",  Health State: %s", *instance.HealthStatus)
 
         // We should add all instance Ids for a single autoscale group to cut down on the api calls
         ec2Input := &ec2.DescribeInstancesInput{
@@ -88,10 +89,16 @@ func main() {
         }
         ecDescription, err := ec2Client.DescribeInstances(ec2Input)
         if err == nil {
-            fmt.Printf("  Private IP: %s,", *ecDescription.Reservations[0].Instances[0].NetworkInterfaces[0].PrivateIpAddress)
-            fmt.Printf("  Public IP: %s,", *ecDescription.Reservations[0].Instances[0].NetworkInterfaces[0].Association.PublicIp)
-            // FIXME(kenr): This assumes the second index.  We need to traverse looking for a tag where Tags[i].Key == 'Name'
-            fmt.Printf("  Name: %s", *ecDescription.Reservations[0].Instances[0].Tags[2].Value)
+            if len(ecDescription.Reservations[0].Instances) > 0  && len(ecDescription.Reservations[0].Instances[0].NetworkInterfaces) > 0 {
+                fmt.Printf(",  Private IP: %s", *ecDescription.Reservations[0].Instances[0].NetworkInterfaces[0].PrivateIpAddress)
+                fmt.Printf(",  Public IP: %s", *ecDescription.Reservations[0].Instances[0].NetworkInterfaces[0].Association.PublicIp)
+                // FIXME(kenr): This assumes the second index.  We need to traverse looking for a tag where Tags[i].Key == 'Name'
+                for _, tag := range ecDescription.Reservations[0].Instances[0].Tags {
+                    if *tag.Key == "Name" {
+                        fmt.Printf(",  Name: %s", *tag.Value)
+                    }
+                }
+            }
         }
         fmt.Printf("\n")
     }
