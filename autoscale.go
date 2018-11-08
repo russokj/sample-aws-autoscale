@@ -78,6 +78,10 @@ func main() {
      */
     ec2Client := ec2.New(sess)
     // (should probably verify we only have 1 group)
+    if (len(asDescription.AutoScalingGroups) == 0) {
+        log.Fatalf("Could not find the autoscale group %s\n", autoscaleName)
+    }
+
     for _, instance := range asDescription.AutoScalingGroups[0].Instances {
 	fmt.Printf("Instance ID: %s,", *instance.InstanceId)
 	fmt.Printf("  Lifecycle State: %s", *instance.LifecycleState)
